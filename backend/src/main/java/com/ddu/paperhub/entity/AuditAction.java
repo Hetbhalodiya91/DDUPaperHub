@@ -1,0 +1,14 @@
+package com.ddu.paperhub.entity;
+
+public enum AuditAction {
+    USER_REGISTERED,
+    USER_ROLE_CHANGED,
+    USER_STATUS_CHANGED,
+    PAPER_UPLOADED,
+    PAPER_APPROVED,
+    PAPER_REJECTED,
+    PAPER_DELETED,
+    REPORT_SUBMITTED,
+    REPORT_RESOLVED,
+    REPORT_DISMISSED
+}

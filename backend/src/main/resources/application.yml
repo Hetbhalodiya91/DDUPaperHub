@@ -1,0 +1,31 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: paperhub-backend
+  profiles:
+    active: dev
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+jwt:
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  expiration-ms: 86400000 # 24 hours
+
+storage:
+  type: ${STORAGE_TYPE:local} # "local" or "s3"
+  local:
+    upload-dir: ${LOCAL_UPLOAD_DIR:./uploads}
+  s3:
+    bucket-name: ${S3_BUCKET_NAME:ddu-paperhub}
+    region: ${AWS_REGION:auto}
+    endpoint: ${S3_ENDPOINT:} # e.g. https://<accountid>.r2.cloudflarestorage.com
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
