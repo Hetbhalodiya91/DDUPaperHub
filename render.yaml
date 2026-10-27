@@ -44,13 +44,11 @@ services:
   # -------------------------------------------------------------
   # 2. React Frontend Service (Global CDN Static Site)
   # -------------------------------------------------------------
-  - type: web
+  - type: static
     name: ddu-paperhub-frontend
-    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
-    plan: free
     routes:
       - type: rewrite
         source: /api/*
