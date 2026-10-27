@@ -1,6 +1,6 @@
 services:
   # -------------------------------------------------------------
-  # 1. Spring Boot Backend Service
+  # 1. Spring Boot Backend Service (Docker)
   # -------------------------------------------------------------
   - type: web
     name: ddu-paperhub-backend
@@ -8,16 +8,22 @@ services:
     dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
     plan: free
-    region: singapore
+    region: oregon
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: SERVER_PORT
-        value: 8081
-      - key: DB_URL
+      - key: DB_HOST
         fromDatabase:
           name: ddu-paperhub-db
-          property: connectionString
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: ddu-paperhub-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: ddu-paperhub-db
+          property: database
       - key: DB_USERNAME
         fromDatabase:
           name: ddu-paperhub-db
@@ -36,7 +42,7 @@ services:
         value: '*'
 
   # -------------------------------------------------------------
-  # 2. React Frontend Service (Static Site)
+  # 2. React Frontend Service (Global CDN Static Site)
   # -------------------------------------------------------------
   - type: web
     name: ddu-paperhub-frontend
@@ -45,8 +51,10 @@ services:
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     plan: free
-    region: singapore
     routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://ddu-paperhub-backend.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
@@ -57,6 +65,6 @@ services:
 databases:
   - name: ddu-paperhub-db
     databaseName: ddu_paperhub
-    user: postgres
+    user: ddu_admin
     plan: free
-    region: singapore
+    region: oregon
