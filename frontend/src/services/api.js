@@ -1,7 +1,28 @@
 import axios from 'axios';
 
+export const getBaseURL = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    const raw = import.meta.env.VITE_API_BASE_URL.trim();
+    return raw.endsWith('/api') ? raw : `${raw.replace(/\/$/, '')}/api`;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('onrender.com')) {
+    return 'https://ddu-paperhub-backend.onrender.com/api';
+  }
+  return '/api';
+};
+
+export const getApiUrl = (path = '') => {
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const base = getBaseURL();
+  if (base.startsWith('http')) {
+    const origin = base.replace(/\/api\/?$/, '');
+    return `${origin}${cleanPath}`;
+  }
+  return cleanPath;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: getBaseURL(),
 });
 
 // Attach JWT token to requests

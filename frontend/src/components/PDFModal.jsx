@@ -1,11 +1,12 @@
 import React from 'react';
 import { X, Download, AlertTriangle, Eye, Calendar, BookOpen, ExternalLink } from 'lucide-react';
+import { getApiUrl } from '../services/api';
 
 export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
   if (!isOpen || !paper) return null;
 
-  const previewUrl = `/api/papers/${paper.id}/preview`;
-  const downloadUrl = `/api/papers/${paper.id}/download`;
+  const previewUrl = getApiUrl(`/api/papers/${paper.id}/preview`);
+  const downloadUrl = getApiUrl(`/api/papers/${paper.id}/download`);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">

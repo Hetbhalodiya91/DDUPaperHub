@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Download, Eye, Calendar, AlertTriangle, Bookmark, BookmarkCheck, FileText } from 'lucide-react';
-import api from '../services/api';
+import api, { getApiUrl } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBookmarked = false, onBookmarkChange }) => {
@@ -54,7 +54,7 @@ export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBo
   };
 
   const formattedSize = paper.fileSizeBytes ? (paper.fileSizeBytes / (1024 * 1024)).toFixed(2) + ' MB' : 'PDF';
-  const thumbnailUrl = `/api/papers/${paper.id}/thumbnail`;
+  const thumbnailUrl = getApiUrl(`/api/papers/${paper.id}/thumbnail`);
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-ddu-300 dark:hover:border-ddu-500 transition-all flex flex-col justify-between group overflow-hidden">
@@ -146,7 +146,7 @@ export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBo
             </button>
 
             <a
-              href={`/api/papers/${paper.id}/download`}
+              href={getApiUrl(`/api/papers/${paper.id}/download`)}
               download={paper.fileName}
               className="flex-1 flex items-center justify-center space-x-1.5 py-2 px-3 bg-ddu-600 hover:bg-ddu-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors"
             >
