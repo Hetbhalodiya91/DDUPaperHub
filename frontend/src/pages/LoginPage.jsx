@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { BookOpen, LogIn, AlertCircle, CheckCircle, Shield, User, Sparkles } from 'lucide-react';
+import { BookOpen, LogIn, AlertCircle, CheckCircle, Shield, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const LoginPage = () => {
@@ -30,11 +30,6 @@ export const LoginPage = () => {
     }
   };
 
-  const setDemoCredentials = (demoEmail, demoPassword) => {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-  };
-
   return (
     <div className="min-h-[80vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-3">
@@ -57,37 +52,6 @@ export const LoginPage = () => {
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 shadow-sm border border-slate-200 rounded-2xl sm:px-10 space-y-6">
-          {/* Quick Demo Login Switcher */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
-            <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-600">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>One-Click Demo Accounts</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => setDemoCredentials('admin@ddu.ac.in', 'Admin@123')}
-                className="px-2 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-semibold rounded-lg border border-purple-200 transition-colors"
-              >
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => setDemoCredentials('contributor@ddu.ac.in', 'Contributor@123')}
-                className="px-2 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold rounded-lg border border-amber-200 transition-colors"
-              >
-                Contributor
-              </button>
-              <button
-                type="button"
-                onClick={() => setDemoCredentials('student@ddu.ac.in', 'Student@123')}
-                className="px-2 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg border border-blue-200 transition-colors"
-              >
-                Student
-              </button>
-            </div>
-          </div>
-
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center space-x-2">
               <AlertCircle className="w-4 h-4 shrink-0" />

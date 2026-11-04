@@ -77,7 +77,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/papers/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/papers/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/papers/{id}/preview").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/papers/{id}/download").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/papers/{id}/download").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/papers/{id}/thumbnail").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/papers/stats").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()

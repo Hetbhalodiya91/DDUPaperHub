@@ -1,12 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Download, AlertTriangle, Eye, Calendar, BookOpen, ExternalLink } from 'lucide-react';
-import { getApiUrl } from '../services/api';
+import api, { getApiUrl } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
+  const { user } = useAuth();
   if (!isOpen || !paper) return null;
 
   const previewUrl = getApiUrl(`/api/papers/${paper.id}/preview`);
-  const downloadUrl = getApiUrl(`/api/papers/${paper.id}/download`);
+
+  // Downloads require authentication. A plain <a> tag cannot carry the JWT,
+  // so the download is triggered via the axios interceptor (which attaches it).
+  const handleDownload = async () => {
+    if (!user) return;
+    try {
+      const res = await api.get(`/api/papers/${paper.id}/download`, { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = paper.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        window.location.href = '/login';
+      }
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
@@ -43,14 +65,20 @@ export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
               <span className="hidden sm:inline">Report File</span>
             </button>
 
-            <a
-              href={downloadUrl}
-              download={paper.fileName}
-              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-ddu-600 hover:bg-ddu-700 rounded-lg shadow-sm transition-colors"
+            <button
+              type="button"
+              onClick={handleDownload}
+              disabled={!user}
+              title={user ? 'Download PDF' : 'Sign in to download'}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition-colors ${
+                user
+                  ? 'text-white bg-ddu-600 hover:bg-ddu-700'
+                  : 'text-slate-400 bg-slate-100 cursor-not-allowed'
+              }`}
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Download</span>
-            </a>
+              <span>{user ? 'Download' : 'Sign in'}</span>
+            </button>
 
             <button
               onClick={onClose}

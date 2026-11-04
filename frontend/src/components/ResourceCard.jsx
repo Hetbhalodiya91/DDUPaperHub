@@ -29,6 +29,32 @@ export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBo
     }
   };
 
+  // Downloads require authentication (JWT is sent via the axios interceptor,
+  // which a plain <a> tag cannot carry). Fetch the file as a blob and trigger
+  // a browser download. Redirects to login if the session is invalid.
+  const handleDownload = async () => {
+    if (!user) return;
+    try {
+      const res = await api.get(`/api/papers/${paper.id}/download`, {
+        responseType: 'blob',
+      });
+      const url = URL.createObjectURL(res.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = paper.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        window.location.href = '/login';
+        return;
+      }
+      console.error('Download failed:', err);
+    }
+  };
+
   const getResourceTypeBadge = (type) => {
     switch (type) {
       case 'SESSIONAL_1':
@@ -145,14 +171,20 @@ export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBo
               <span>Preview</span>
             </button>
 
-            <a
-              href={getApiUrl(`/api/papers/${paper.id}/download`)}
-              download={paper.fileName}
-              className="flex-1 flex items-center justify-center space-x-1.5 py-2 px-3 bg-ddu-600 hover:bg-ddu-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors"
+            <button
+              type="button"
+              onClick={handleDownload}
+              disabled={!user}
+              title={user ? 'Download PDF' : 'Sign in to download'}
+              className={`flex-1 flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl text-xs font-semibold shadow-sm transition-colors ${
+                user
+                  ? 'bg-ddu-600 hover:bg-ddu-700 text-white'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+              }`}
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Download</span>
-            </a>
+              <span>{user ? 'Download' : 'Sign in'}</span>
+            </button>
 
             {user && (
               <button

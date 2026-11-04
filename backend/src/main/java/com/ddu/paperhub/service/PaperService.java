@@ -127,6 +127,10 @@ public class PaperService {
         Paper paper = paperRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Paper not found with id: " + id));
 
+        if (paper.getStatus() != ResourceStatus.APPROVED) {
+            throw new BadRequestException("This resource is not available for preview.");
+        }
+
         paper.setViewCount(paper.getViewCount() + 1);
         paperRepository.save(paper);
 
@@ -137,6 +141,10 @@ public class PaperService {
     public Resource loadPaperForDownload(Long id) {
         Paper paper = paperRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Paper not found with id: " + id));
+
+        if (paper.getStatus() != ResourceStatus.APPROVED) {
+            throw new BadRequestException("This resource is not available for download.");
+        }
 
         paper.setDownloadCount(paper.getDownloadCount() + 1);
         paperRepository.save(paper);
