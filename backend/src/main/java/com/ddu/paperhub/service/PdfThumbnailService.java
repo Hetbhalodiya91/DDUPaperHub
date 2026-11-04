@@ -1,7 +1,7 @@
 package com.ddu.paperhub.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -22,9 +22,9 @@ public class PdfThumbnailService {
      */
     public byte[] generateThumbnail(InputStream pdfInputStream) {
         try {
-            // Stream directly through PDFBox instead of buffering the entire file
-            // into memory — avoids OutOfMemoryError on large PDFs (e.g. 50 MB uploads).
-            try (PDDocument document = Loader.loadPDF(pdfInputStream)) {
+            // Use PDFParser with InputStream — streams the PDF without buffering
+            // the entire file into memory, avoiding OutOfMemoryError on large PDFs.
+            try (PDDocument document = new PDFParser(pdfInputStream).parse()) {
                 if (document.getNumberOfPages() > 0) {
                     PDFRenderer pdfRenderer = new PDFRenderer(document);
                     // Render page 0 at 100 DPI for fast loading & sharp preview
