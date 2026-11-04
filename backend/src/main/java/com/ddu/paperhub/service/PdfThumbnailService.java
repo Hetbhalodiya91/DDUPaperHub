@@ -1,7 +1,7 @@
 package com.ddu.paperhub.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -11,6 +11,9 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 @Service
 @Slf4j
@@ -21,14 +24,19 @@ public class PdfThumbnailService {
      * Returns null if rendering fails so upload never gets blocked.
      */
     public byte[] generateThumbnail(InputStream pdfInputStream) {
+        Path tempFile = null;
         try {
-            // Use PDFParser with InputStream — streams the PDF without buffering
-            // the entire file into memory, avoiding OutOfMemoryError on large PDFs.
-            try (PDDocument document = new PDFParser(pdfInputStream).parse()) {
+            // Write the PDF to a temp file on disk instead of buffering it in heap.
+            // PDFBox's Loader only accepts byte[], File, or RandomAccessRead —
+            // none of which stream directly from an InputStream without memory pressure.
+            tempFile = Files.createTempFile("pdf-thumb-", ".pdf");
+            Files.copy(pdfInputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+
+            try (PDDocument document = Loader.loadPDF(tempFile.toFile())) {
                 if (document.getNumberOfPages() > 0) {
                     PDFRenderer pdfRenderer = new PDFRenderer(document);
-                    // Render page 0 at 100 DPI for fast loading & sharp preview
-                    BufferedImage bim = pdfRenderer.renderImageWithDPI(0, 100, ImageType.RGB);
+                    // Render page 0 at 72 DPI for fast loading & low memory usage
+                    BufferedImage bim = pdfRenderer.renderImageWithDPI(0, 72, ImageType.RGB);
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
                     ImageIO.write(bim, "jpeg", out);
                     return out.toByteArray();
@@ -36,6 +44,10 @@ public class PdfThumbnailService {
             }
         } catch (Exception ex) {
             log.warn("Could not generate thumbnail from PDF: {}", ex.getMessage());
+        } finally {
+            if (tempFile != null) {
+                try { Files.deleteIfExists(tempFile); } catch (Exception e) { /* ignore */ }
+            }
         }
         return null;
     }
