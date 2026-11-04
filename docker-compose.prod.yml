@@ -31,13 +31,13 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       SERVER_PORT: 8081
-      STORAGE_TYPE: ${STORAGE_TYPE:-local}
+      STORAGE_TYPE: s3
       LOCAL_UPLOAD_DIR: /app/uploads
-      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-}
-      AWS_REGION: ${AWS_REGION:-auto}
-      S3_ENDPOINT: ${S3_ENDPOINT:-}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      S3_BUCKET_NAME: ddu-paperhub
+      AWS_REGION: auto
+      S3_ENDPOINT: https://7188cfbc71536983536d63f725bd336a.r2.cloudflarestorage.com
+      AWS_ACCESS_KEY_ID: a34ffc9c700824320fdfaddc54400f6c
+      AWS_SECRET_ACCESS_KEY: f86a0a9a5f5d01aa6564491698a216cc8edd4ffa048d6f3741dd36ebe963459f
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost,https://yourdomain.com}
     ports:
       - "8081:8081"
