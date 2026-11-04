@@ -91,8 +91,22 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-        // Frame options for H2 console
-        http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
+        // Framing: the PDF preview is embedded in an <iframe> served from the frontend,
+        // which is a different origin than the backend. X-Frame-Options would block that
+        // cross-origin frame, so it is NOT set — CSP frame-ancestors governs framing instead.
+        if (allowedOrigins.contains("*")) {
+            // Wildcard CORS → no framing restriction (matches permissive CORS config)
+            log.warn("CORS allowed-origins is '*': PDF preview iframe will be framable by any origin");
+        } else {
+            String frameAncestors = " 'self' " + String.join(" ",
+                    Arrays.stream(allowedOrigins.split(","))
+                            .map(String::trim)
+                            .filter(s -> !s.isBlank())
+                            .toList());
+            http.headers(headers -> headers.contentSecurityPolicy(
+                    csp -> csp.policyDirectives("frame-ancestors" + frameAncestors)
+            ));
+        }
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
