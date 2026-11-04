@@ -144,10 +144,12 @@ export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
               <span>{paper.downloadCount} downloads</span>
             </span>
             <a
-              href={previewUrl}
+              href={blobUrl || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-ddu-600 hover:underline flex items-center space-x-0.5 ml-2"
+              className={`flex items-center space-x-0.5 ml-2 ${
+                blobUrl ? 'text-ddu-600 hover:underline' : 'text-slate-300 cursor-not-allowed'
+              }`}
             >
               <span>Open in new tab</span>
               <ExternalLink className="w-3 h-3" />
