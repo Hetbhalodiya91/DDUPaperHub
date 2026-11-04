@@ -95,19 +95,22 @@ public class SecurityConfig {
 
         // Framing: the PDF preview is embedded in an <iframe> served from the frontend,
         // which is a different origin than the backend. X-Frame-Options would block that
-        // cross-origin frame, so it is NOT set — CSP frame-ancestors governs framing instead.
+        // cross-origin frame, so it is explicitly DISABLED — CSP frame-ancestors governs
+        // framing instead (Spring Security 6 defaults to DENY, so this must be explicit).
         if (allowedOrigins.contains("*")) {
             // Wildcard CORS → no framing restriction (matches permissive CORS config)
             log.warn("CORS allowed-origins is '*': PDF preview iframe will be framable by any origin");
+            http.headers(headers -> headers.frameOptions(f -> f.disable()));
         } else {
             String frameAncestors = " 'self' " + String.join(" ",
                     Arrays.stream(allowedOrigins.split(","))
                             .map(String::trim)
                             .filter(s -> !s.isBlank())
                             .toList());
-            http.headers(headers -> headers.contentSecurityPolicy(
-                    csp -> csp.policyDirectives("frame-ancestors" + frameAncestors)
-            ));
+            http.headers(headers -> headers
+                    .frameOptions(f -> f.disable())
+                    .contentSecurityPolicy(csp -> csp.policyDirectives("frame-ancestors" + frameAncestors))
+            );
         }
 
         http.authenticationProvider(authenticationProvider());
