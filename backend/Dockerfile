@@ -23,9 +23,10 @@ RUN mkdir -p /app/uploads
 COPY --from=build /app/target/paperhub-backend-1.0.0.jar app.jar
 
 ENV SERVER_PORT=8081
-ENV STORAGE_TYPE=local
+ENV STORAGE_TYPE=s3
 ENV LOCAL_UPLOAD_DIR=/app/uploads
+ENV JAVA_OPTS="-Xms128m -Xmx256m -XX:MaxDirectMemorySize=64m"
 
 EXPOSE 8081
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]

@@ -22,8 +22,9 @@ public class PdfThumbnailService {
      */
     public byte[] generateThumbnail(InputStream pdfInputStream) {
         try {
-            byte[] bytes = pdfInputStream.readAllBytes();
-            try (PDDocument document = Loader.loadPDF(bytes)) {
+            // Stream directly through PDFBox instead of buffering the entire file
+            // into memory — avoids OutOfMemoryError on large PDFs (e.g. 50 MB uploads).
+            try (PDDocument document = Loader.loadPDF(pdfInputStream)) {
                 if (document.getNumberOfPages() > 0) {
                     PDFRenderer pdfRenderer = new PDFRenderer(document);
                     // Render page 0 at 100 DPI for fast loading & sharp preview
