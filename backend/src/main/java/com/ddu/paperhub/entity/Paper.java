@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "papers", indexes = {
@@ -85,4 +87,13 @@ public class Paper {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewed_by_id")
     private User reviewedBy;
+
+    // --- Relationships with Cascade Delete ---
+    @OneToMany(mappedBy = "paper", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Report> reports = new ArrayList<>();
+
+    @OneToMany(mappedBy = "paper", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Bookmark> bookmarks = new ArrayList<>();
 }

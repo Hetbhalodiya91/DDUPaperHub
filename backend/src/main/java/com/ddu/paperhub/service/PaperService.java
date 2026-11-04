@@ -213,12 +213,24 @@ public class PaperService {
             }
         }
 
-        fileStorageService.deleteFile(paper.getFileKey());
-        if (paper.getThumbnailKey() != null) {
-            fileStorageService.deleteFile(paper.getThumbnailKey());
-        }
+        // Delete the database row FIRST so the resource disappears from the UI immediately.
+        // Cascade handles dependent rows (reports, bookmarks); storage cleanup is
+        // best-effort afterwards so a transient R2 outage never blocks deletion.
         paperRepository.delete(paper);
         log.info("Paper id={} deleted by {}", id, requesterEmail);
+
+        try {
+            fileStorageService.deleteFile(paper.getFileKey());
+        } catch (Exception ex) {
+            log.warn("Could not delete file from storage: {}", paper.getFileKey(), ex.getMessage());
+        }
+        if (paper.getThumbnailKey() != null) {
+            try {
+                fileStorageService.deleteFile(paper.getThumbnailKey());
+            } catch (Exception ex) {
+                log.warn("Could not delete thumbnail from storage: {}", paper.getThumbnailKey(), ex.getMessage());
+            }
+        }
 
         auditLogService.record(AuditAction.PAPER_DELETED, requesterEmail, "Paper:" + id, "Title: " + paper.getTitle());
     }
