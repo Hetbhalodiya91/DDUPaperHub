@@ -35,7 +35,7 @@ export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBo
   const handleDownload = async () => {
     if (!user) return;
     try {
-      const res = await api.get(`/api/papers/${paper.id}/download`, {
+      const res = await api.get(`/papers/${paper.id}/download`, {
         responseType: 'blob',
       });
       const url = URL.createObjectURL(res.data);

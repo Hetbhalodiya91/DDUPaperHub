@@ -12,7 +12,7 @@ export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
   const handleDownload = async () => {
     if (!user) return;
     try {
-      const res = await api.get(`/api/papers/${paper.id}/download`, { responseType: 'blob' });
+      api.get(`/papers/${paper.id}/download`, { responseType: 'blob' })
       const url = URL.createObjectURL(res.data);
       const link = document.createElement('a');
       link.href = url;
@@ -38,7 +38,7 @@ export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
     let active = true;
     setBlobUrl(null);
     setLoadError(null);
-    api.get(`/api/papers/${paper.id}/preview`, { responseType: 'blob' })
+    api.get(`/papers/${paper.id}/preview`, { responseType: 'blob' })
       .then((res) => {
         if (active) setBlobUrl(URL.createObjectURL(res.data));
       })
