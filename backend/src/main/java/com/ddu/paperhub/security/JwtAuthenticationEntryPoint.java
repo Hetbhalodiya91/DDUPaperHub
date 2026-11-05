@@ -29,7 +29,9 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         body.put("timestamp", LocalDateTime.now().toString());
         body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         body.put("error", "Unauthorized");
-        body.put("message", authException.getMessage());
+        // Never echo the raw exception message to the client — it can expose
+        // internal class names, stack traces, or other implementation details.
+        body.put("message", "Authentication required");
         body.put("path", request.getServletPath());
 
         objectMapper.writeValue(response.getOutputStream(), body);

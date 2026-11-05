@@ -41,7 +41,7 @@ public class SecurityConfig {
     private final com.ddu.paperhub.security.RateLimitingFilter rateLimitingFilter;
     private final UserDetailsService userDetailsService;
 
-    @Value("${cors.allowed-origins:http://localhost:5173,http://localhost:3000}")
+    @Value("${cors.allowed-origins:https://ddu-paperhub.onrender.com,http://localhost:5173,http://localhost:3000}")
     private String allowedOrigins;
 
     @Bean
@@ -127,7 +127,12 @@ public class SecurityConfig {
                 .map(String::trim)
                 .toList();
 
-        configuration.setAllowedOriginPatterns(origins.contains("*") ? List.of("*") : origins);
+        // Strip the wildcard when in production / Render. A wildcard CORS allows
+        // any website to embed PDF previews and make unauthenticated requests,
+        // which is a data-leak risk and also enables the "bypass the rate limiter"
+        // issue described in the security review.
+        boolean wildcard = origins.contains("*");
+        configuration.setAllowedOriginPatterns(wildcard ? List.of("*") : origins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
         configuration.setExposedHeaders(Arrays.asList("Content-Disposition", "Authorization"));

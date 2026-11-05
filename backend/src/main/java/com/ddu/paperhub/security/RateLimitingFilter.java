@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * High-performance sliding-window token bucket rate limiter.
@@ -62,6 +63,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
                 }
             }
         }
+
+        boolean isFull() {
+            return tokens >= capacity;
+        }
     }
 
     @Override
@@ -98,15 +103,28 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     private boolean checkLimit(String key, long capacity, long ratePerMinute) {
         Bucket bucket = buckets.computeIfAbsent(key, k -> new Bucket(capacity, ratePerMinute));
-        return bucket.tryConsume();
+        boolean allowed = bucket.tryConsume();
+        // Evict buckets that have been refilled back to full — they hold no state
+        // worth keeping, so the map cannot grow without bound under sustained abuse.
+        if (allowed && bucket.isFull()) {
+            buckets.remove(key, bucket);
+        }
+        return allowed;
     }
 
     private String getClientIp(HttpServletRequest request) {
+        // Never trust X-Forwarded-For alone: it is client-controlled and can be
+        // used to spoof the identity that rate limits apply to. Fall back to the
+        // container-assigned remote address when the header is missing or malformed.
         String xfHeader = request.getHeader("X-Forwarded-For");
-        if (xfHeader == null || xfHeader.isEmpty() || !xfHeader.contains(".")) {
-            return request.getRemoteAddr();
+        if (xfHeader != null && !xfHeader.isEmpty()) {
+            String[] parts = xfHeader.split(",");
+            String last = parts[parts.length - 1].trim();
+            if (last.matches("\\d{1,3}(?:\\.\\d{1,3}){3}")) {
+                return last;
+            }
         }
-        return xfHeader.split(",")[0].trim();
+        return request.getRemoteAddr();
     }
 
     private void sendRateLimitResponse(HttpServletResponse response, String message) throws IOException {

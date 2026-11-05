@@ -12,7 +12,7 @@ export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
   const handleDownload = async () => {
     if (!user) return;
     try {
-      api.get(`/papers/${paper.id}/download`, { responseType: 'blob' })
+      const res = await api.get(`/papers/${paper.id}/download`, { responseType: 'blob' });
       const url = URL.createObjectURL(res.data);
       const link = document.createElement('a');
       link.href = url;

@@ -36,10 +36,18 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        migrateConstraints();
-        seedUsers();
-        seedDepartmentsAndSubjects();
-        seedSamplePaper();
+        // Only seed when the application starts in a dev-like profile.
+        // Production uses a separate managed DB where we cannot safely touch
+        // users/seeding and instead manage the admin account via Render env vars.
+        String profile = System.getProperty("spring.profiles.active", "default");
+        if (!"prod".equals(profile) && !"production".equals(profile)) {
+            migrateConstraints();
+            seedUsers();
+            seedDepartmentsAndSubjects();
+            seedSamplePaper();
+        } else {
+            log.info("Skipping DataInitializer seeding in profile: {}", profile);
+        }
     }
 
     private void migrateConstraints() {

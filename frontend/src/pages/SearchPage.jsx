@@ -67,6 +67,15 @@ export const SearchPage = () => {
 
   // Execute search when filters or page change
   useEffect(() => {
+    // Debounce the keyword so each keystroke doesn't fire a request.
+    const timer = setTimeout(() => {
+      performSearch();
+    }, 300);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyword, departmentId, semester, subjectId, resourceType, examYear, page]);
+
+  const performSearch = () => {
     setLoading(true);
     const params = new URLSearchParams();
     if (keyword) params.append('keyword', keyword);
@@ -87,11 +96,21 @@ export const SearchPage = () => {
           setPapers(res.data.data.content || []);
           setTotalPages(res.data.data.totalPages || 0);
           setTotalElements(res.data.data.totalElements || 0);
+        } else {
+          // Backend returned a non-success response — treat as empty, not an error
+          setPapers([]);
+          setTotalPages(0);
+          setTotalElements(0);
         }
       })
-      .catch((err) => console.error('Search error', err))
+      .catch((err) => {
+        console.error('Search error', err);
+        setPapers([]);
+        setTotalPages(0);
+        setTotalElements(0);
+      })
       .finally(() => setLoading(false));
-  }, [keyword, departmentId, semester, subjectId, resourceType, examYear, page]);
+  };
 
   const handleResetFilters = () => {
     setKeyword('');

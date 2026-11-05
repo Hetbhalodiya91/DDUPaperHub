@@ -21,8 +21,14 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('ddu_paperhub_user', JSON.stringify(res.data.data));
           }
         })
-        .catch(() => {
-          logout();
+        .catch((err) => {
+          // Only log out on a real auth failure (expired/invalid token).
+          // A transient timeout or server error should NOT drop the session —
+          // the user would otherwise be kicked out every time the backend
+          // wakes up after a cold start.
+          if (err.response && err.response.status === 401) {
+            logout();
+          }
         })
         .finally(() => setLoading(false));
     } else {

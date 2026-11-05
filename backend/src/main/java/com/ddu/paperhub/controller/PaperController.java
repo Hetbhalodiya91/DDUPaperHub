@@ -47,7 +47,12 @@ public class PaperController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PaperResponse>> getPaperById(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.success("Paper retrieved", paperService.getPaperById(id)));
+        try {
+            PaperResponse paper = paperService.getPaperById(id);
+            return ResponseEntity.ok(ApiResponse.success("Paper retrieved", paper));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/{id}/preview")
@@ -93,6 +98,7 @@ public class PaperController {
             @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
+        // Validate using the DTO-level constraints so rejected papers never reach the DB
         PaperUploadRequest request = PaperUploadRequest.builder()
                 .title(title)
                 .description(description)
@@ -100,6 +106,17 @@ public class PaperController {
                 .examYear(examYear)
                 .subjectId(subjectId)
                 .build();
+
+        // Spring validation — triggers MethodArgumentNotValidException on constraint failure
+        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+            throw new BadRequestException("Title is required");
+        }
+        if (request.getExamYear() == null || request.getExamYear() < 1990 || request.getExamYear() > 2100) {
+            throw new BadRequestException("Exam year must be between 1990 and 2100");
+        }
+        if (request.getSubjectId() == null) {
+            throw new BadRequestException("Subject ID is required");
+        }
 
         PaperResponse response = paperService.uploadPaper(request, file, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED)
