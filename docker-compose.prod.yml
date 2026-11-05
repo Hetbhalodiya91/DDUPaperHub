@@ -1,35 +1,26 @@
-services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: ddu_paperhub_postgres
-    restart: always
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-ddu_paperhub}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-ddu_paperhub}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+# DDUPaperHub — Production stack (own server)
+#
+# Database: Supabase (managed PostgreSQL). There is NO local database container
+# here — the backend connects to Supabase over the network using the connection
+# string from Project Settings → Database → Connection string.
+#
+# All PDFs live in Cloudflare R2 (S3-compatible object storage).
+#
+# Before starting, create .env with:
+#   SUPABASE_DB_URL, SUPABASE_DB_USERNAME, SUPABASE_DB_PASSWORD, JWT_SECRET
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
 
+services:
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: ddu_paperhub_backend
     restart: always
-    depends_on:
-      postgres:
-        condition: service_healthy
+    env_file: .env
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-ddu_paperhub}
-      DB_USERNAME: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
+      SPRING_PROFILES_ACTIVE: supabase
       SERVER_PORT: 8081
       STORAGE_TYPE: s3
       LOCAL_UPLOAD_DIR: /app/uploads
@@ -56,5 +47,4 @@ services:
       - "80:80"
 
 volumes:
-  postgres_data:
   uploads_data:

@@ -102,3 +102,26 @@ AWS_REGION=auto
 AWS_ACCESS_KEY_ID=<your-access-key>
 AWS_SECRET_ACCESS_KEY=<your-secret-key>
 ```
+
+---
+
+## 🗄️ Database: Supabase (Managed PostgreSQL)
+
+The production database is **Supabase**. All PDFs are stored in Cloudflare R2, not the database.
+
+### Quick setup
+
+1. Create a project at [https://supabase.com](https://supabase.com) (free tier).
+2. Go to **Settings** → **Database** → **Connection string** and copy the `postgresql://` URL.
+3. Run `supabase/schema.sql` in the Supabase **SQL Editor** to create the tables.
+4. Set `SUPABASE_DB_URL`, `SUPABASE_DB_USERNAME`, `SUPABASE_DB_PASSWORD` and run the backend with `SPRING_PROFILES_ACTIVE=supabase`.
+
+### Migrating existing data
+
+```bash
+RENDER_DB_URL="postgres://old:pass@old-host:5432/ddu_paperhub" \
+SUPABASE_DB_URL="postgres://postgres:pass@aws-0-us-east-1.pooler.supabase.com:6543/ddu_paperhub" \
+node supabase/migrate.js
+```
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the full procedure.

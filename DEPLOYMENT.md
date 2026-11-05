@@ -4,6 +4,46 @@ This guide walks you through setting up your **Production Server** and enabling 
 
 ---
 
+## 🗄️ Database: Supabase (Managed PostgreSQL)
+
+The production database is **Supabase** — a managed PostgreSQL service with a free tier.
+All PDFs are stored in **Cloudflare R2** (S3-compatible object storage), not in the database.
+
+### Get your Supabase connection string
+
+1. Go to https://supabase.com → create a project (free).
+2. Open the project → **Settings** → **Database** → **Connection string**.
+3. Copy the `postgresql://` URL — it contains the user, password, host, port, and database.
+
+### Environment variables
+
+| Variable | Where it comes from |
+|---|---|
+| `SUPABASE_DB_URL` | Supabase connection string (full `postgresql://` URL) |
+| `SUPABASE_DB_USERNAME` | From the connection string |
+| `SUPABASE_DB_PASSWORD` | From the connection string |
+
+The backend runs with `SPRING_PROFILES_ACTIVE=supabase`, which reads these variables
+from `backend/src/main/resources/application-supabase.yml`.
+
+### Schema
+
+The schema is created once by running `supabase/schema.sql` in the Supabase SQL Editor.
+It mirrors the JPA entities exactly, so the app boots with `ddl-auto: update` and no
+further migrations are needed.
+
+### Migrating data from the old database
+
+Run `node supabase/migrate.js` with both connection strings:
+
+```bash
+RENDER_DB_URL="postgres://..." SUPABASE_DB_URL="postgres://..." node supabase/migrate.js
+```
+
+See [Step 3.5](#-step-35-migrate-the-data) below.
+
+---
+
 ## 🏗️ Architecture Overview
 
 ```text
@@ -44,16 +84,29 @@ git push -u origin main
 
 ---
 
-## 🖥️ Step 2: Prepare Your Production Server
+## ☁️ Step 2: Set Up Supabase (Database)
+
+Supabase is the database for this project. It is free to start and stays cheap.
+
+1. Go to [https://supabase.com](https://supabase.com) and create an account.
+2. Create a new project (any name, any region).
+3. Wait 2-3 minutes for it to provision.
+4. Go to **Settings** → **Database** → **Connection string** and copy the
+   `postgresql://...` URL.
+5. Go to **SQL Editor** and run the contents of `supabase/schema.sql` to create
+   the tables.
+
+That's it — the database is ready.
+
+### 2.1 (Optional) Prepare Your Production Server
 
 You can use any Linux VPS (Ubuntu 22.04 / 24.04 recommended):
-- **Free / Cheap Options**:
-  - **Oracle Cloud Free Tier** (Always Free 4-Core ARM / 24GB RAM or 1GB AMD instance)
-  - **DigitalOcean** ($4 - $6/month Droplet)
-  - **AWS EC2** (t4g.small or t3.micro Free Tier)
-  - **Hetzner** (€4/month Cloud Server)
+- **Oracle Cloud Free Tier** (Always Free 4-Core ARM / 24GB RAM or 1GB AMD instance)
+- **DigitalOcean** ($4 - $6/month Droplet)
+- **AWS EC2** (t4g.small or t3.micro Free Tier)
+- **Hetzner** (€4/month Cloud Server)
 
-### 2.1 Install Docker & Git on Server
+### 2.2 Install Docker & Git on Server
 SSH into your server and run:
 
 ```bash
@@ -73,25 +126,29 @@ docker --version
 docker compose version
 ```
 
-### 2.2 Clone Repository onto Server (First-Time Setup)
+### 2.3 Clone Repository onto Server (First-Time Setup)
 
 ```bash
 # Clone the repository
 git clone https://github.com/<YOUR_GITHUB_USERNAME>/DDUPaperHub.git
 cd DDUPaperHub
 
-# Create production environment file
+# Create environment file
 cp .env.example .env
-nano .env   # Fill in a strong POSTGRES_PASSWORD and random JWT_SECRET
+nano .env   # Fill in SUPABASE_DB_URL, SUPABASE_DB_USERNAME, SUPABASE_DB_PASSWORD, JWT_SECRET
 ```
 
-### 2.3 Initial Start
+### 2.4 Initial Start
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
 Your app will be live at `http://<YOUR_SERVER_IP>`!
+
+> **Note:** `docker-compose.prod.yml` now points the backend at Supabase. If you are
+> running on Render instead of your own server, use `render.yaml` — it configures
+> Supabase as a managed database on Render directly.
 
 ---
 
@@ -126,6 +183,24 @@ Now connect GitHub Actions to your server so that **every push to `main` automat
 
 ---
 
+## 🔄 Step 3.5: Migrate the Data
+
+If you already have data on the old database (Render's managed PostgreSQL), move it
+to Supabase before switching the app over.
+
+```bash
+# 1. Get the old DB connection string from Render: Dashboard → ddu-paperhub-db → Connection
+# 2. Get the Supabase connection string (from Step 2)
+# 3. Run the migration
+RENDER_DB_URL="postgres://old:pass@old-host:5432/ddu_paperhub" \
+SUPABASE_DB_URL="postgres://postgres:pass@aws-0-us-east-1.pooler.supabase.com:6543/ddu_paperhub" \
+node supabase/migrate.js
+```
+
+The script copies all 7 tables (users, departments, subjects, papers, bookmarks,
+reports, audit_logs) in FK-safe order and prints a row-count verification at the end.
+It truncates the destination first, so it is safe to re-run.
+
 ## 🚀 Step 4: Test Automatic Deployment!
 
 Now, whenever you update any code locally:
@@ -139,6 +214,11 @@ git push origin main
 2. It runs all Java tests and frontend build checks.
 3. Once passed, it SSHs into your server, pulls the commit, and rebuilds the containers without downtime!
 4. You can monitor the live progress in your GitHub repo under the **Actions** tab.
+
+> **Before the first deploy after switching to Supabase:** make sure the Supabase
+> tables exist (`supabase/schema.sql`) and the data is migrated (Step 3.5), then set
+> the `SUPABASE_DB_*` env vars on the server or in Render. The app will boot with
+> `SPRING_PROFILES_ACTIVE=supabase`.
 
 ---
 
