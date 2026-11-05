@@ -5,6 +5,8 @@ import com.ddu.paperhub.dto.PaperResponse;
 import com.ddu.paperhub.dto.PaperUploadRequest;
 import com.ddu.paperhub.entity.ResourceStatus;
 import com.ddu.paperhub.entity.ResourceType;
+import com.ddu.paperhub.exception.BadRequestException;
+import com.ddu.paperhub.exception.ResourceNotFoundException;
 import com.ddu.paperhub.service.PaperService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
