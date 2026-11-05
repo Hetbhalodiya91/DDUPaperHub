@@ -52,3 +52,27 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+/**
+ * Extract a human-readable error message from an axios error.
+ *
+ * The backend's GlobalExceptionHandler returns two shapes:
+ *   - Validation failures:  { "error": "Validation Failed", "errors": { field: "msg" } }
+ *   - Other errors:         { "message": "..." }
+ * The frontend used to only read `message`, so validation failures always
+ * surfaced as the generic "Registration failed." instead of the real reason.
+ */
+export function getErrorMessage(error, fallback = 'An error occurred.') {
+  const data = error?.response?.data;
+  if (!data) return fallback;
+
+  if (typeof data === 'string') return data || fallback;
+
+  // Validation errors: join all field messages into one readable string.
+  if (data.errors && typeof data.errors === 'object') {
+    const messages = Object.values(data.errors).filter(Boolean);
+    if (messages.length > 0) return messages.join(' ');
+  }
+
+  return data.message || fallback;
+}

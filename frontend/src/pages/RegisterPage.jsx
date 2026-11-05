@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getErrorMessage } from '../services/api';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export const RegisterPage = () => {
       await register(name, email, password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Registration failed.');
+      setError(getErrorMessage(err, 'Registration failed.'));
     } finally {
       setLoading(false);
     }

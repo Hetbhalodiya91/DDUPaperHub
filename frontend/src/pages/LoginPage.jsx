@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { BookOpen, LogIn, AlertCircle, CheckCircle, Shield, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getErrorMessage } from '../services/api';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ export const LoginPage = () => {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Invalid email or password.');
+      setError(getErrorMessage(err, 'Invalid email or password.'));
     } finally {
       setLoading(false);
     }

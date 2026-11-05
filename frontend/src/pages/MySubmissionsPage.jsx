@@ -12,7 +12,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { PDFModal } from '../components/PDFModal';
 
 export const MySubmissionsPage = () => {
@@ -54,7 +54,7 @@ export const MySubmissionsPage = () => {
       await api.delete(`/papers/${id}`);
       fetchSubmissions();
     } catch (err) {
-      setActionError(err.response?.data?.message || 'Could not delete paper');
+      setActionError(getErrorMessage(err, 'Could not delete paper'));
     }
   };
 

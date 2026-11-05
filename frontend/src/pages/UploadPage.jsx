@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, FileUp, CheckCircle2, AlertCircle, ArrowLeft, Info } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 export const UploadPage = () => {
@@ -100,7 +100,7 @@ export const UploadPage = () => {
         setSuccess(true);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to upload paper. Please try again.');
+      setError(getErrorMessage(err, 'Failed to upload paper. Please try again.'));
     } finally {
       setSubmitting(false);
     }

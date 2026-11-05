@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('ddu_paperhub_user', JSON.stringify(authData));
       return authData;
     }
-    throw new Error(res.data?.message || 'Login failed');
+    throw new Error(getErrorMessage(error, 'Login failed'));
   };
 
   const register = async (name, email, password) => {
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('ddu_paperhub_user', JSON.stringify(authData));
       return authData;
     }
-    throw new Error(res.data?.message || 'Registration failed');
+    throw new Error(getErrorMessage(error, 'Registration failed'));
   };
 
   const logout = () => {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, AlertTriangle, Send } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 export const ReportModal = ({ paper, isOpen, onClose, onSuccess }) => {
@@ -38,7 +38,7 @@ export const ReportModal = ({ paper, isOpen, onClose, onSuccess }) => {
         onClose();
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit report. Please try again.');
+      setError(getErrorMessage(err, 'Failed to submit report. Please try again.'));
     } finally {
       setSubmitting(false);
     }
