@@ -15,6 +15,20 @@ All PDFs are stored in **Cloudflare R2** (S3-compatible object storage), not in 
 2. Open the project → **Settings** → **Database** → **Connection string**.
 3. Copy the `postgresql://` URL — it contains the user, password, host, port, and database.
 
+⚠️ **Important — split the URL before you use it.** If your password contains an
+`@` character (e.g. `Hetp@tel9126`), the JDBC driver mis-parses the URL and the
+app fails to boot with:
+```
+Driver org.postgresql.Driver claims to not accept jdbcUrl, ...
+```
+So set the env vars like this:
+
+| Variable | Value |
+|---|---|
+| `SUPABASE_DB_URL` | `postgresql://db.<ref>.supabase.co:5432/postgres` — **host+port+db only, no password** |
+| `SUPABASE_DB_USERNAME` | `postgres.<ref>` (the user from the connection string) |
+| `SUPABASE_DB_PASSWORD` | the password |
+
 ### Environment variables
 
 | Variable | Where it comes from |

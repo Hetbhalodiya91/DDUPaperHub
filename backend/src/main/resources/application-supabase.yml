@@ -1,12 +1,19 @@
 # Supabase profile — run with:
 #   SPRING_PROFILES_ACTIVE=supabase   (or -Dspring.profiles.active=supabase)
 #
-# Supabase exposes a standard PostgreSQL instance. The connection string it
-# gives you (Project Settings → Database → Connection string) is the simplest
-# way to wire it up. Either pass the full string or the individual parts.
+# Supabase exposes a standard PostgreSQL instance. Wire it up with the host,
+# port and database ONLY — never put the password inside the URL.
+#
+# WHY: a password containing '@' (e.g. "Hetp@tel9126") breaks JDBC URL parsing,
+# because the driver reads "user:password@host". If you paste Supabase's full
+# connection string into SUPABASE_DB_URL, the app fails to boot with:
+#   Driver org.postgresql.Driver claims to not accept jdbcUrl, ...
+# So split it: URL = host+port+db, username/password as separate fields.
 
 spring:
   datasource:
+    # HOST + PORT + DATABASE ONLY. No user:password@ prefix.
+    # e.g. postgresql://db.cfviaihvvbbotyxrzytr.supabase.co:5432/postgres
     url: ${SUPABASE_DB_URL}
     username: ${SUPABASE_DB_USERNAME}
     password: ${SUPABASE_DB_PASSWORD}

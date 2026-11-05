@@ -26,8 +26,10 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: supabase
       - key: SUPABASE_DB_URL
+        # HOST + PORT + DATABASE ONLY — never put user:password@ in the URL.
+        # A password containing '@' breaks JDBC URL parsing and the app won't boot.
         # PLACEHOLDER — set the real value on the Render dashboard
-        value: postgresql://postgres:CHANGE-ME:CHANGE-ME@db.example.supabase.co:5432/postgres
+        value: postgresql://db.example.supabase.co:5432/postgres
       - key: SUPABASE_DB_USERNAME
         # PLACEHOLDER — set the real value on the Render dashboard
         value: CHANGE-ME
