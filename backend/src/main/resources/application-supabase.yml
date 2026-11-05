@@ -4,16 +4,17 @@
 # Supabase exposes a standard PostgreSQL instance. Wire it up with the host,
 # port and database ONLY — never put the password inside the URL.
 #
-# WHY: a password containing '@' (e.g. "Hetp@tel9126") breaks JDBC URL parsing,
-# because the driver reads "user:password@host". If you paste Supabase's full
-# connection string into SUPABASE_DB_URL, the app fails to boot with:
-#   Driver org.postgresql.Driver claims to not accept jdbcUrl, ...
-# So split it: URL = host+port+db, username/password as separate fields.
+# TWO gotchas that make the app fail to boot:
+#   1. The URL MUST start with "jdbc:" — the driver rejects a bare
+#      "postgresql://" URL with "Driver ... claims to not accept jdbcUrl".
+#   2. A password containing '@' (e.g. "Hetp@tel9126") breaks JDBC URL parsing
+#      because the driver reads "user:password@host".
+# So split it: URL = jdbc:postgresql://host:port/db, username/password separate.
 
 spring:
   datasource:
-    # HOST + PORT + DATABASE ONLY. No user:password@ prefix.
-    # e.g. postgresql://db.cfviaihvvbbotyxrzytr.supabase.co:5432/postgres
+    # HOST + PORT + DATABASE ONLY, with the "jdbc:" prefix. No user:password@.
+    # e.g. jdbc:postgresql://db.cfviaihvvbbotyxrzytr.supabase.co:5432/postgres
     url: ${SUPABASE_DB_URL}
     username: ${SUPABASE_DB_USERNAME}
     password: ${SUPABASE_DB_PASSWORD}

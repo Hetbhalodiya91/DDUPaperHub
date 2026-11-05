@@ -112,10 +112,11 @@ The production database is **Supabase**. All PDFs are stored in Cloudflare R2, n
 ### Quick setup
 
 1. Create a project at [https://supabase.com](https://supabase.com) (free tier).
-2. Go to **Settings** → **Database** → **Connection string** and copy the `postgresql://` URL.
+2. Go to **Settings** → **Database** → **Connection string** and copy the `jdbc:postgresql://` URL.
 3. Run `supabase/schema.sql` in the Supabase **SQL Editor** to create the tables.
-4. Set `SUPABASE_DB_URL` (host+port+db only), `SUPABASE_DB_USERNAME`, `SUPABASE_DB_PASSWORD` and run the backend with `SPRING_PROFILES_ACTIVE=supabase`.
+4. Set `SUPABASE_DB_URL` (host+port+db only, with the `jdbc:` prefix), `SUPABASE_DB_USERNAME`, `SUPABASE_DB_PASSWORD` and run the backend with `SPRING_PROFILES_ACTIVE=supabase`.
 
+⚠️ **The URL must start with `jdbc:`** — the driver rejects a bare `postgresql://` URL.
 ⚠️ **Never put a password containing `@` inside the URL** — the JDBC driver mis-parses
 it and the app won't boot. Keep the password in `SUPABASE_DB_PASSWORD` instead.
 

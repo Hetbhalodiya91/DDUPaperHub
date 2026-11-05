@@ -13,19 +13,22 @@ All PDFs are stored in **Cloudflare R2** (S3-compatible object storage), not in 
 
 1. Go to https://supabase.com → create a project (free).
 2. Open the project → **Settings** → **Database** → **Connection string**.
-3. Copy the `postgresql://` URL — it contains the user, password, host, port, and database.
+3. Copy the `jdbc:postgresql://` URL — it contains the user, password, host, port, and database.
 
-⚠️ **Important — split the URL before you use it.** If your password contains an
-`@` character (e.g. `Hetp@tel9126`), the JDBC driver mis-parses the URL and the
-app fails to boot with:
-```
-Driver org.postgresql.Driver claims to not accept jdbcUrl, ...
-```
+⚠️ **Important — split the URL before you use it.** Two things make the app fail to boot:
+
+1. The URL **must start with `jdbc:`** — the driver rejects a bare `postgresql://` URL with:
+   ```
+   Driver org.postgresql.Driver claims to not accept jdbcUrl, ...
+   ```
+2. If your password contains an `@` character (e.g. `Hetp@tel9126`), the JDBC driver
+   mis-parses the URL (it reads `user:password@host`).
+
 So set the env vars like this:
 
 | Variable | Value |
 |---|---|
-| `SUPABASE_DB_URL` | `postgresql://db.<ref>.supabase.co:5432/postgres` — **host+port+db only, no password** |
+| `SUPABASE_DB_URL` | `jdbc:postgresql://db.<ref>.supabase.co:5432/postgres` — **host+port+db only, no password, with `jdbc:` prefix** |
 | `SUPABASE_DB_USERNAME` | `postgres.<ref>` (the user from the connection string) |
 | `SUPABASE_DB_PASSWORD` | the password |
 
@@ -33,7 +36,7 @@ So set the env vars like this:
 
 | Variable | Where it comes from |
 |---|---|
-| `SUPABASE_DB_URL` | Supabase connection string (full `postgresql://` URL) |
+| `SUPABASE_DB_URL` | Supabase connection string (full `jdbc:postgresql://` URL) |
 | `SUPABASE_DB_USERNAME` | From the connection string |
 | `SUPABASE_DB_PASSWORD` | From the connection string |
 
@@ -106,7 +109,7 @@ Supabase is the database for this project. It is free to start and stays cheap.
 2. Create a new project (any name, any region).
 3. Wait 2-3 minutes for it to provision.
 4. Go to **Settings** → **Database** → **Connection string** and copy the
-   `postgresql://...` URL.
+   `jdbc:postgresql://...` URL.
 5. Go to **SQL Editor** and run the contents of `supabase/schema.sql` to create
    the tables.
 
