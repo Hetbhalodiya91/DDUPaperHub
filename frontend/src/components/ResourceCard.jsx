@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Download, Eye, Calendar, AlertTriangle, Bookmark, BookmarkCheck, FileText } from 'lucide-react';
 import api, { getApiUrl } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -93,6 +94,7 @@ export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBo
           <img
             src={thumbnailUrl}
             alt={`Preview of ${paper.title}`}
+            loading="lazy"
             onError={() => setThumbError(true)}
             className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
           />
@@ -110,8 +112,28 @@ export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBo
 
       <div className="p-5 flex flex-col justify-between flex-1">
         <div>
-          {/* Top Badges */}
-          <div className="flex items-center justify-between gap-2 mb-3">
+          {/* Department & Subject */}
+          <div className="flex items-center space-x-1.5 text-xs text-ddu-700 dark:text-ddu-400 font-semibold mb-1.5">
+            <span className="bg-ddu-50 dark:bg-ddu-900/40 px-1.5 py-0.5 rounded border border-ddu-100 dark:border-ddu-800">
+              {paper.subjectCode}
+            </span>
+            <span className="text-slate-400">•</span>
+            <span className="text-slate-600 dark:text-slate-300 truncate">{paper.departmentName}</span>
+          </div>
+
+          {/* Paper Title: the first thing students scan for */}
+          <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-ddu-700 dark:group-hover:text-ddu-400 transition-colors line-clamp-2 text-lg leading-snug">
+            {paper.title}
+          </h3>
+
+          {paper.description && (
+            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1.5 leading-relaxed">
+              {paper.description}
+            </p>
+          )}
+
+          {/* Exam type, semester and year sit under the title */}
+          <div className="flex items-center justify-between gap-2 mt-3">
             <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
               {getResourceTypeBadge(paper.resourceType)}
               <span className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium px-2 py-0.5 rounded-md">
@@ -123,26 +145,6 @@ export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBo
               <span>{paper.examYear}</span>
             </span>
           </div>
-
-          {/* Department & Subject */}
-          <div className="flex items-center space-x-1.5 text-xs text-ddu-700 dark:text-ddu-400 font-semibold mb-1">
-            <span className="bg-ddu-50 dark:bg-ddu-900/40 px-1.5 py-0.5 rounded border border-ddu-100 dark:border-ddu-800">
-              {paper.subjectCode}
-            </span>
-            <span className="text-slate-400">•</span>
-            <span className="text-slate-600 dark:text-slate-300 truncate">{paper.departmentName}</span>
-          </div>
-
-          {/* Paper Title */}
-          <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-ddu-700 dark:group-hover:text-ddu-400 transition-colors line-clamp-2 text-base mt-1">
-            {paper.title}
-          </h3>
-
-          {paper.description && (
-            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1.5 leading-relaxed">
-              {paper.description}
-            </p>
-          )}
         </div>
 
         <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-slate-700">
@@ -150,12 +152,14 @@ export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBo
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-3">
             <div className="flex items-center space-x-3">
               <span className="flex items-center space-x-1" title="Views">
-                <Eye className="w-3.5 h-3.5 text-slate-400" />
+                <Eye className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
                 <span>{paper.viewCount || 0}</span>
+                <span className="sr-only">views</span>
               </span>
               <span className="flex items-center space-x-1" title="Downloads">
-                <Download className="w-3.5 h-3.5 text-slate-400" />
+                <Download className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
                 <span>{paper.downloadCount || 0}</span>
+                <span className="sr-only">downloads</span>
               </span>
             </div>
             <span className="text-slate-400 dark:text-slate-500 font-medium">{formattedSize}</span>
@@ -171,26 +175,34 @@ export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBo
               <span>Preview</span>
             </button>
 
-            <button
-              type="button"
-              onClick={handleDownload}
-              disabled={!user}
-              title={user ? 'Download PDF' : 'Sign in to download'}
-              className={`flex-1 flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl text-xs font-semibold shadow-sm transition-colors ${
-                user
-                  ? 'bg-ddu-600 hover:bg-ddu-700 text-white'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
-              }`}
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>{user ? 'Download' : 'Sign in'}</span>
-            </button>
+            {user ? (
+              <button
+                type="button"
+                onClick={handleDownload}
+                title="Download PDF"
+                className="flex-1 flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl text-xs font-semibold shadow-sm transition-colors bg-ddu-600 hover:bg-ddu-700 text-white"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download</span>
+              </button>
+            ) : (
+              // Logged-out students get a normal, clickable button instead of a greyed-out one
+              <Link
+                to="/login"
+                title="Sign in to download"
+                className="flex-1 flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl text-xs font-semibold shadow-sm transition-colors bg-ddu-600 hover:bg-ddu-700 text-white"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Sign in to download</span>
+              </Link>
+            )}
 
             {user && (
               <button
                 onClick={handleBookmarkToggle}
                 disabled={bookmarkLoading}
                 title={bookmarked ? 'Remove bookmark' : 'Bookmark this paper'}
+                aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this paper'}
                 className={`p-2 rounded-xl border transition-colors ${
                   bookmarked
                     ? 'text-ddu-600 bg-ddu-50 border-ddu-200 hover:bg-ddu-100'
@@ -205,6 +217,7 @@ export const ResourceCard = ({ paper, onPreview, onReport, bookmarked: initialBo
               onClick={() => onReport(paper)}
               className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl border border-transparent hover:border-amber-200 transition-colors"
               title="Report this file"
+              aria-label="Report this file"
             >
               <AlertTriangle className="w-3.5 h-3.5" />
             </button>

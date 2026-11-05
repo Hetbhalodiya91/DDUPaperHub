@@ -15,9 +15,12 @@ import api from '../services/api';
 import { ResourceCard } from '../components/ResourceCard';
 import { PDFModal } from '../components/PDFModal';
 import { ReportModal } from '../components/ReportModal';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const semesterParam = searchParams.get('semester');
+  useDocumentTitle(semesterParam ? `Sem ${semesterParam} Papers` : 'Browse Papers');
 
   // Filters from query params
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
