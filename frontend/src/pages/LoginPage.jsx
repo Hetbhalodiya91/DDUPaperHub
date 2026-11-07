@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { BookOpen, LogIn, AlertCircle, CheckCircle, Shield, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { PasswordInput } from '../components/PasswordInput';
 import { getErrorMessage } from '../services/api';
 
 export const LoginPage = () => {
@@ -79,13 +80,11 @@ export const LoginPage = () => {
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
                 Password
               </label>
-              <input
-                type="password"
-                required
+              <PasswordInput
+                id="login-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none"
               />
             </div>
 

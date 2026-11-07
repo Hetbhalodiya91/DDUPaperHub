@@ -129,12 +129,12 @@ export const SearchPage = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Header & Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
             Academic Question Papers &amp; Resources
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             {totalElements} verified {totalElements === 1 ? 'resource' : 'resources'} available
           </p>
         </div>
@@ -151,7 +151,7 @@ export const SearchPage = () => {
                 setPage(0);
               }}
               placeholder="Search subject, code, topic..."
-              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             />
             {keyword && (
               <button
@@ -205,7 +205,7 @@ export const SearchPage = () => {
                   setSubjectId('');
                   setPage(0);
                 }}
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none bg-white"
+                className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               >
                 <option value="">All Departments</option>
                 {departments.map((dept) => (
@@ -228,7 +228,7 @@ export const SearchPage = () => {
                   setSubjectId('');
                   setPage(0);
                 }}
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none bg-white"
+                className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               >
                 <option value="">All Semesters</option>
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
@@ -248,7 +248,7 @@ export const SearchPage = () => {
                   setSubjectId(e.target.value);
                   setPage(0);
                 }}
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none bg-white"
+                className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               >
                 <option value="">All Subjects</option>
                 {subjects.map((sub) => (
@@ -270,7 +270,7 @@ export const SearchPage = () => {
                   setResourceType(e.target.value);
                   setPage(0);
                 }}
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none bg-white"
+                className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               >
                 <option value="">All Types</option>
                 <option value="SESSIONAL_1">Sessional 1 Exam</option>
@@ -294,7 +294,7 @@ export const SearchPage = () => {
                   setExamYear(e.target.value);
                   setPage(0);
                 }}
-                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none bg-white"
+                className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-ddu-500 focus:border-ddu-500 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               >
                 <option value="">All Years</option>
                 {[2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018].map((yr) => (
