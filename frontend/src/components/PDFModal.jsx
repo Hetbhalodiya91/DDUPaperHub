@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X, Download, AlertTriangle, Eye, Calendar, BookOpen, ExternalLink, FileText } from 'lucide-react';
-import api from '../services/api';
+import api, { getApiUrl } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
@@ -28,30 +28,26 @@ export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
     }
   };
 
-  // Fetch the PDF as a blob and display it from a blob: URL. A blob: URL is
-  // same-origin with the page, so the browser never needs to frame the backend
-  // across origins — this works regardless of the backend's framing headers.
-  const [blobUrl, setBlobUrl] = useState(null);
+  // Point the iframe at the backend's preview endpoint directly. Android Chrome
+  // cannot reliably render a PDF loaded from a blob: URL inside an iframe, so a
+  // direct (non-blob) URL is used instead. The backend already disables
+  // X-Frame-Options and allows the frontend origin in frame-ancestors, so this
+  // cross-origin frame is permitted by both the browser and the server.
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     let active = true;
-    setBlobUrl(null);
+    setPreviewUrl(null);
     setLoadError(null);
-    api.get(`/papers/${paper.id}/preview`, { responseType: 'blob' })
-      .then((res) => {
-        if (active) setBlobUrl(URL.createObjectURL(res.data));
-      })
-      .catch((err) => {
-        if (active) setLoadError(err.response?.status === 401 ? 'Sign in to preview this file.' : 'Could not load PDF preview.');
-      });
+    setPreviewUrl(getApiUrl(`/papers/${paper.id}/preview`));
     return () => { active = false; };
   }, [paper.id]);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
       <div 
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[92vh] flex flex-col overflow-hidden border border-slate-200"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] max-h-[90vh] flex flex-col overflow-hidden border border-slate-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -114,9 +110,9 @@ export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
               <FileText className="w-12 h-12" />
               <span className="text-sm font-medium">{loadError}</span>
             </div>
-          ) : blobUrl ? (
+          ) : previewUrl ? (
             <iframe
-              src={blobUrl}
+              src={previewUrl}
               title={paper.title}
               className="w-full h-full border-0"
             />
@@ -144,11 +140,11 @@ export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
               <span>{paper.downloadCount} downloads</span>
             </span>
             <a
-              href={blobUrl || '#'}
+              href={previewUrl || '#'}
               target="_blank"
               rel="noopener noreferrer"
               className={`flex items-center space-x-0.5 ml-2 ${
-                blobUrl ? 'text-ddu-600 hover:underline' : 'text-slate-300 cursor-not-allowed'
+                previewUrl ? 'text-ddu-600 hover:underline' : 'text-slate-300 cursor-not-allowed'
               }`}
             >
               <span>Open in new tab</span>
