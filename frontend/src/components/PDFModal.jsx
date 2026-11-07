@@ -40,7 +40,7 @@ export const PDFModal = ({ paper, isOpen, onClose, onOpenReport }) => {
     let active = true;
     setPreviewUrl(null);
     setLoadError(null);
-    setPreviewUrl(getApiUrl(`/papers/${paper.id}/preview`));
+    setPreviewUrl(getApiUrl(`/api/papers/${paper.id}/preview`));
     return () => { active = false; };
   }, [paper.id]);
 
